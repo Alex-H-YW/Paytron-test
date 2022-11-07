@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -7,7 +7,8 @@ import classes from './DropDown.module.css';
 const DropDown = (props) => {
   const [open, setOpen] = useState(false);
 
-  const handleOpen = () => {
+  const handleOpen = (e) => {
+    //stopBubble(e);
     setOpen(!open);
   };
 
@@ -15,11 +16,37 @@ const DropDown = (props) => {
     props.setSelected(key);
     setOpen(false);
   };
+  //method for prevent bubble
+  // const stopBubble = (event) => {
+  //   event.stopPropagation();
+  //   event.nativeEvent.stopImmediatePropagation();
+  // };
 
+// useEffect(()=> {
+//   document.addEventListener('click', () => {
+//      setOpen(false);  
+//   })
+// }, [open])
+
+
+  const menuRef = useRef();
+
+  useEffect(() => {
+    const handler = (event) => {
+      if (event.target instanceof HTMLElement && 
+          menuRef.current &&
+          !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('click', handler);
+    return () => window.addEventListener('click', handler);
+  });
+ 
   return (
     <div className={`${classes.container} ${props.className}`} style={props.style}>
       {props.label && <span>{props.label}</span>}
-      <button onClick={handleOpen} className={classes.dropdown}>
+      <button ref={menuRef} onClick={e => handleOpen(e)} className={classes.dropdown}>
         {props.leftIcon}
         <span className={classes.dropdownText}>{props.selected}</span>
 
